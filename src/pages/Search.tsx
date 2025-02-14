@@ -1,37 +1,60 @@
+import { Image, Table } from "antd";
+import Search from "antd/es/input/Search";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFlickrSearch } from "../api/photo";
 import { RootState } from "../app/store";
 import { setQuery } from "../features/searchSlice";
+import SpeedTest from "../features/TestSpeed";
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
   const query = useSelector((state: RootState) => state.search.query);
-  const images = useSelector((state: RootState) => state.search.results);
-  const { data, isLoading, error } = useFlickrSearch(query);
+  const { data, isLoading } = useFlickrSearch(query);
 
+  const columns = [
+    {
+      title: 'Images',
+      dataIndex: 'images',
+      key: 'image',
+      render: (text: string) => <Image
+        width={200}
+        src={text}
+      />,
+    },
+    {
+      title: 'Author',
+      dataIndex: 'author',
+      key: 'author',
+    },
+    {
+      title: 'Tags',
+      dataIndex: 'tag',
+      key: 'tag',
+    },
+    {
+      title: 'Links',
+      dataIndex: 'link',
+      key: 'link',
+    },
+  ];
 
-  console.log(data);
   return (
-    <div>
-      <input
-        type="text"
-        placeholder="Search Flickr..."
-        value={query}
-        onChange={(e) => dispatch(setQuery(e.target.value))}
-      />
-      {isLoading && <p>Loading...</p>}
-      {error && <p>Error fetching images</p>}
-      <div>
-        {data?.items?.map((image, index) => (
-          <div key={index}>
-            <a href={image.link} target="_blank" rel="noopener noreferrer">
-              <img src={image.media.m} alt={image.title} />
-            </a>
-            <p>Author: {image.author}</p>
-            <p>Tags: {image.tags}</p>
-          </div>
-        ))}
+    <div style={{
+      width: '100%',
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between'
+      }}>
+        <h1>Searching Image in flickr</h1>
+        <SpeedTest />
+      </div>
+      <Search placeholder="input search text" value={query} onChange={(e) => dispatch(setQuery(e.target.value))} style={{ width: 200 }} />
+      <div style={{
+        paddingTop: 20,
+      }}>
+        <Table dataSource={data} loading={isLoading} columns={columns} />
       </div>
     </div>
   );

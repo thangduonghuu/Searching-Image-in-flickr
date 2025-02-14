@@ -8,10 +8,17 @@ export interface Image {
   tags: string;
 }
 
+export interface DataImage {
+  images: string;
+  author: string;
+  tag: string;
+  link: string;
+}
+
 interface SearchState {
   query: string;
   results: {
-    items: Image[];
+    items: DataImage[];
   };
 }
 
@@ -29,8 +36,8 @@ const searchSlice = createSlice({
     setQuery: (state, action: PayloadAction<string>) => {
       state.query = action.payload;
     },
-    setResults: (state, action: PayloadAction<SearchState>) => {
-      state.results = action.payload;
+    setResults: (state, action: PayloadAction<{ items: DataImage[] }>) => {
+      state.results.items = action.payload.items;
     },
   },
 });
