@@ -7,7 +7,8 @@ export default defineConfig({
   server: {
     host: 'localhost',
     allowedHosts: true,
-    cors: true,
+    cors: false,
+    port: 3000,
     proxy: {
       "/api": {
         target: "https://www.flickr.com/",

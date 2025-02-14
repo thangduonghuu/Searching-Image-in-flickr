@@ -1,43 +1,40 @@
-import React, { useState, ChangeEvent } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../app/store';
-import { fetchPhotos } from '../features/searchSlice';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useFlickrSearch } from "../api/photo";
+import { RootState } from "../app/store";
+import { setQuery } from "../features/searchSlice";
 
-const Search: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const dispatch = useDispatch<AppDispatch>();
-  const { photos, status, error } = useSelector((state: RootState) => state.search);
+const App: React.FC = () => {
+  const dispatch = useDispatch();
+  const query = useSelector((state: RootState) => state.search.query);
+  const images = useSelector((state: RootState) => state.search.results);
+  const { data, isLoading, error } = useFlickrSearch(query);
 
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    dispatch(fetchPhotos(e.target.value));
-  };
 
+  console.log(data);
   return (
     <div>
       <input
         type="text"
-        value={searchTerm}
-        onChange={handleSearch}
-        placeholder="Search for photos..."
+        placeholder="Search Flickr..."
+        value={query}
+        onChange={(e) => dispatch(setQuery(e.target.value))}
       />
-      {status === 'loading' && <p>Loading...</p>}
-      {status === 'succeeded' && (
-        <ul>
-          {photos.map((photo) => (
-            <li key={photo.link}>
-              <a href={photo.link}>
-                <img src={photo.media.m} alt={photo.title} />
-              </a>
-              <p>Author: {photo.author}</p>
-              <p>Tags: {photo.tags}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-      {status === 'failed' && <p>{error}</p>}
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error fetching images</p>}
+      <div>
+        {data?.items?.map((image, index) => (
+          <div key={index}>
+            <a href={image.link} target="_blank" rel="noopener noreferrer">
+              <img src={image.media.m} alt={image.title} />
+            </a>
+            <p>Author: {image.author}</p>
+            <p>Tags: {image.tags}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default Search;
+export default App;

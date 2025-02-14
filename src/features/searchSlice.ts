@@ -1,63 +1,39 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface Photo {
+export interface Image {
   title: string;
-  link: string;
   media: { m: string };
+  link: string;
   author: string;
   tags: string;
 }
 
 interface SearchState {
-  photos: Photo[];
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
+  query: string;
+  results: {
+    items: Image[];
+  };
 }
 
 const initialState: SearchState = {
-  photos: [],
-  status: "idle",
-  error: null,
+  query: "",
+  results: {
+    items: [],
+  },
 };
-
-const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
-const FLICKR_API_URL =
-  "https://www.flickr.com/services/feeds/photos_public.gne?format=json&nojsoncallback=1&tags=";
-
-export const fetchPhotos = createAsyncThunk<Photo[], string>(
-  "search/fetchPhotos",
-  async (searchTerm) => {
-    const response = await axios.get(`${FLICKR_API_URL}${searchTerm}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data.items;
-  }
-);
 
 const searchSlice = createSlice({
   name: "search",
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchPhotos.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(
-        fetchPhotos.fulfilled,
-        (state, action: PayloadAction<Photo[]>) => {
-          state.status = "succeeded";
-          state.photos = action.payload;
-        }
-      )
-      .addCase(fetchPhotos.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message ?? "Something went wrong";
-      });
+  reducers: {
+    setQuery: (state, action: PayloadAction<string>) => {
+      state.query = action.payload;
+    },
+    setResults: (state, action: PayloadAction<SearchState>) => {
+      state.results = action.payload;
+    },
   },
 });
 
+export const { setQuery, setResults } = searchSlice.actions;
 export default searchSlice.reducer;
